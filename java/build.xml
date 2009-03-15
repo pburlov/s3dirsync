@@ -30,9 +30,8 @@
 			<fileset dir="lib" includes="*.jar"></fileset>
 		</unzip>
 		<delete dir="${build.dir}/META-INF"></delete>
-		<buildnumber/>
 		<tstamp></tstamp>
-		<jar destfile="${dist.dir}/${product.name}.jar">
+		<jar destfile="${dist.dir}/${product.name}-${build.number}.jar">
 			<fileset dir="${build.dir}" includes="**/*"></fileset>
 			<fileset dir="jar" includes="**/*"></fileset>
 			<fileset dir="src" includes="**/*"></fileset>
@@ -45,13 +44,14 @@
 	</target>
 	
 	<target name="create_dist">
-		<zip destfile="${dist.dir}/${product.name}.zip" >
-			<zipfileset dir="${dist.dir}" prefix="${product.name}"><include name="${product.name}.jar"/></zipfileset>
+		<zip destfile="${dist.dir}/${product.name}-${build.number}.zip" >
+			<zipfileset dir="${dist.dir}" prefix="${product.name}"><include name="${product.name}-${build.number}.jar"/></zipfileset>
 			<zipfileset dir="jar/META-INF" includes="*" prefix="${product.name}"></zipfileset>
 		</zip>
 	</target>
 		
 	<target name="build">
+		<buildnumber/>
 		<antcall target="clean"></antcall>
 		<antcall target="compile"></antcall>
 		<antcall target="create_jar"></antcall>
@@ -60,7 +60,7 @@
 		<antcall target="clean"></antcall>
 	</target>
 	<target name="create_src_dist" description="Packt kompletten Projekt in ein Zip Archiv">
-		<zip destfile="${dist.dir}/${product.name}-src.zip">
+		<zip destfile="${dist.dir}/${product.name}-src-${build.number}.zip">
 			<zipfileset dir="." prefix="${product.name}">
 				<exclude name="build/**"/>
 				<exclude name="dist/**"/>
