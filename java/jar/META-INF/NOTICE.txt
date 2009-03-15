@@ -1,0 +1,20 @@
+   =========================================================================
+   ==  NOTICE file corresponding to section 4(d) of the Apache License,   ==
+   ==  Version 2.0, in this case for the distribution of s3dirsync        ==
+   =========================================================================
+
+   This product includes software developed by:
+
+   The Apache Software Foundation (http://www.apache.org/).
+   
+    Sun Microsystems (http://www.sun.com/)
+   
+    The Legion Of The Bouncy Castle (http://www.bouncycastle.org)
+    
+    JetS3t (https://jets3t.dev.java.net/)
+
+   The ExoLab Project (http://www.exolab.org/)
+
+   Codehaus (http://castor.codehaus.org)
+   
+   Safehaus (http://jug.safehaus.org/Home)    

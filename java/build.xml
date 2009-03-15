@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<project default="build" name="build file for s3dirsync">
+	<property name="src.dir" value="src"></property>
+	<property name="build.dir" value="build"></property>
+	<property name="dist.dir" value="dist"></property>
+	<property name="product.name" value="s3dirsync"></property>
+	
+	<path id="cp">
+		<fileset dir="lib">
+			<include name="*.jar"/>
+		</fileset>
+		<fileset dir="libext" includes="*.jar">
+		</fileset>
+	</path>
+	
+	<target name="clean">
+		<delete dir="${build.dir}"/>
+		<mkdir dir="${build.dir}"/>
+		<mkdir dir="${dist.dir}"/>
+	</target>
+	
+	<target name="compile">
+		<javac srcdir="${src.dir}" destdir="${build.dir}" classpathref="cp" debug="true">
+			<exclude name="**/test/*"/>
+		</javac>
+	</target>
+	
+	<target name="create_jar">
+		<unzip dest="${build.dir}">
+			<fileset dir="lib" includes="*.jar"></fileset>
+		</unzip>
+		<delete dir="${build.dir}/META-INF"></delete>
+		<buildnumber/>
+		<tstamp></tstamp>
+		<jar destfile="${dist.dir}/${product.name}.jar">
+			<fileset dir="${build.dir}" includes="**/*"></fileset>
+			<fileset dir="jar" includes="**/*"></fileset>
+			<fileset dir="src" includes="**/*"></fileset>
+			<manifest>
+				<attribute name="Main-Class" value="de.burlov.amazon.s3.dirsync.CLI"/>
+				<attribute name="Build-Number" value="${build.number}"/>
+				<attribute name="Create-Date" value="${TODAY}"/>
+			</manifest>
+		</jar>
+	</target>
+	
+	<target name="create_dist">
+		<zip destfile="${dist.dir}/${product.name}.zip" >
+			<zipfileset dir="${dist.dir}" prefix="${product.name}"><include name="${product.name}.jar"/></zipfileset>
+			<zipfileset dir="jar/META-INF" includes="*" prefix="${product.name}"></zipfileset>
+		</zip>
+	</target>
+		
+	<target name="build">
+		<antcall target="clean"></antcall>
+		<antcall target="compile"></antcall>
+		<antcall target="create_jar"></antcall>
+		<antcall target="create_dist"/>
+		<antcall target="create_src_dist"></antcall>
+		<antcall target="clean"></antcall>
+	</target>
+	<target name="create_src_dist" description="Packt kompletten Projekt in ein Zip Archiv">
+		<zip destfile="${dist.dir}/${product.name}-src.zip">
+			<zipfileset dir="." prefix="${product.name}">
+				<exclude name="build/**"/>
+				<exclude name="dist/**"/>
+				<exclude name="bin/**"/>
+			</zipfileset>
+		</zip>
+	</target>
+</project>

@@ -1,0 +1,5 @@
+Version 1.0.0 (September 2008)
+- Initial revision
+
+Version 1.1.0 (Dezember 2008)
+- Efficient handling of duplicated or renamed files: no unnecessary uploads more.

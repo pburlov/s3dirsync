@@ -1,0 +1,88 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+
+<head>
+  <title>s3dirsync</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="KEYWORDS" content="S3 amazon java dir sync">
+</head>
+<p>
+<H2>s3dirsync</H2>
+<H3>Kurzbeschreibung</H3>
+<p>
+s3dirsync ist ein Kommandozeilenprogramm mit dem Sie lokale Verzeichnisse auf Amazon's <A href="http://www.amazon.com/gp/browse.html?node=16427261">Simple Storage Service (S3)</A> hochladen
+und in beiden Richtungen synchronisieren koennen.<br>
+s3dirsync ist in Java geschrieben und duerfte auf allen Plattformen mit Java Standard Edition laufen (getestet unter Windows und Linux). Es wird lediglich installierte <A href="http://java.com">Java Laufzeitumgebung (JRE)</A> ab Version 5 (1.5) benoetigt.<br>
+Die verwendete Kombination aus S3 und Java bietet sehr hohe Datensicherheit und Verfuegbarkeit fuer Ihre Daten. 
+s3dirsync ist unter <A href="http://www.apache.org/licenses/LICENSE-2.0">Apache Lizenz</A> als Open Source freigegeben. 
+<!--  -->
+</p>
+<H3>Funktionsumfang</H3>
+<ul>
+<LI>Verzeichnisse in 'snapshot' Modus hoch und runterladen</LI>
+<LI>Verzeichnisse in 'update' Modus synchronisieren (hoch und runter)</LI>
+<LI>Verzeichnisse auf dem Server loeschen</LI>
+<LI>Verzeichnisse auf dem Server auflisten</LI>
+<LI>Info zu verbrauchten Speicherplatz und abgelegten Verzeichnissen</LI>
+<LI>S3 Buckets auflisten</LI>
+<LI>S3 Buckets loeschen</LI>
+</ul>
+
+<H3>Sicherheit</H3>
+<p>
+<ul>
+<LI>Gesamte Datenuebertragug ueber Internet von/zu Amazon S3 Servern wird duch SSL geschuetzt</LI>
+<LI>Integritaet der uebertragenen verschluesselten Daten wird mit einem MD5 Hash serverseitig geprueft</LI>
+<LI>Es werden ALLE Daten verschluesselt auf dem S3 Server abgelegt inklusive Dateinamen und Index-Dateien</LI>
+<LI>Primaere 256 Bit Schluessel wird aus Passworteingabe gemaess dem Standard <A href="http://tools.ietf.org/html/rfc2898">"PKCS 5 V2.0 Scheme 2"</A> generiert. Mit diesem Schlussel wird Index-Datei verschluesselt die wiederum sekundaeren 256 Bit Schluessel fuer eigentliche Datenverschluesselung enthaelt. Sekundaerer Schluessel wird mit Hilfe eines Zufallszahlgenerator einmalig generiert.
+</LI>
+<LI>
+Als Verschluesselungsalgorithmus wird <A href="http://de.wikipedia.org/wiki/Serpent_(Verschl%C3%BCsselung)">Serpent</A> Cipher verwendet. Serpent ist einer der 5 AES Finalisten und ist laut Cryptoexerten sicherer als AES Finalist Rindajel.
+</LI>
+<LI>Daten werden in <A href="http://en.wikipedia.org/wiki/EAX_mode">EAX</A> Modus mit eingebauter Intergrationspruefung verschluesselt.</LI>
+</ul>
+Als Backend fuer cryptographische Operationen dient sehr gute Bibliothek von <A href="http://www.bouncycastle.org/">bouncycastle.org</A>
+</p>
+<H3>Verwendung</H3>
+<p>Um s3dirsync benutzen zu koennen brauchen Sie einen Account bei Amazon Webservices. Wenn Sie schon ein Kunde von Amazon sind, dann ist es sehr schnell und leicht einzurichten. Dazu gehen Sie auf die <A href="http://www.amazon.com/gp/browse.html?node=16427261">S3 Webseite</A> und folgen Sie den Anweisungen (auf Englisch).</p>
+<p>Falls sie noch keine <A href="http://java.com">JRE</A> auf Ihrem System installiert haben, ist es ein guter Zeitpunkt dies zu tun - nicht nur wegen s3dirsync. Um zu testen ob Java installiert ist tippen sie in der Kommandozeile 'java -version'. Das Resultat soll circa so aussehen 
+<div><i> Java(TM) SE Runtime Environment (build 1.6.0_06-b02)<br>
+Java HotSpot(TM) Server VM (build 10.0-b22, mixed mode)</i>
+</div>
+</p>
+<p>Um s3dirsync zu starten gehen Sie in den Verzeichnis mit s3dirsync.jar Datei und tippen sie in der Kommandozeile 'java -jar s3dirsync.jar'. Als Resultat werden sie Uebersicht ueber verfugbare Optionen und Befehle erhalten.
+</p>
+<h4>Funktionsprinzipien</h4>
+<p>
+Alle Benutzerdaten in S3 werden in Gruppen (Buckets) mit global unique Namen aufgeteilt. Ein Benutzer kann nur eine bestimmte maximale Anzahl der Buckets anlegen - z.Z. 100. s3dirsync braucht fuer Betrieb eigenes nur fuer ihn reserviertes Bucket. Ich wuerde dringend abraten dieses Bucket parallel auch fuer irgendwelche andere Zwecke zu benutzen. Man kann s3dirsync mit einem bereits bestehendem Bucket benutzen oder falls kein spezifiziert ist wird automatisch ein Bucket mit hoffentlich unique Namen erstellt. Denn in S3 System wenn schon ein Bucket mit gleichen Namen von anderem Benutzer erstellt wurde haben Sie Pech gehabt und muessen anderen Bucketnamen ausdenken.
+</p>
+<p>
+Innerhalb eines Buckets koennen Sie Ihre Daten in Verzeichnissen ordnen. Serverseitiger Verzeichnis ist das Gegenstueck fuer ihren lokalen Verzeichnis. Lokale und serverseitige Verzeichnisse muessen nicht gleich heissen. Dateien in serverseitigen Verzeichnis werden mit ihrem relativen Pfad zum lokalen Verzeichnis als Basis gespeichert. D.h. wenn lokaler Verzeichnis '/home/user/lok' heisst und serverseitiger Verzeichnis 'rem' dann werden bei einem '-snapshot up' Befehl alle Dateien aus '/home/user/lok' in serverseitigen Verzeichnis 'rem' mit ihren relativen Pfaden gespeichert ohne '/home/user/lok/' vornedran. 
+</p>
+<p>Programmargumente sind in zwei Gruppen geteilt: Optionen und Befehle. Optionen enthalten Informationen die zum Ausfuehren der Befehle benoetigt werden.</p>
+<h4>Wichtigste Befehle</h4>
+<ul>
+<LI>-listBuckets: Listet erstellte Buckets des Benutzers</LI>
+<LI>-summary: Gibt Uebersicht ueber angelegte Verzeichnisse in einem Bucket und deren Speicherverbrauch</LI>
+<LI>-listDir: Listet in einem serverseitigen Verzeichnis vorhandene Dateien auf</LI>
+<LI>-deleteBucket: loescht kompletten Bucket samt aller eventuell vorhandenen Verzeichnissen</LI>
+<LI>-deleteDir: loescht einen Verzeichnis in Bucket</LI>
+<LI>-update &lt;up|down>: synchronisiert Daten zwischen lokalen und serverseitigen Verzeichnis. 'update' Befehl ist undestruktiv und wirkt additiv. D.h. bei Synchronisierung werden keine Dateien geloescht sondern nur geaenderte Ueberschrieben und neue hinzugefuegt. Eine aus Quellverzeichnis entfernte Dateie wird damit nicht auch in Zielverzeichnis entfernt, falls sie dort schon vorhanden ist.</LI>
+<LI>-snapshot &lt;up|down>: erstellt exakten Abbild von einem Verzeichnis. Genau wie mit 'update' Befehl werden nur geaederte oder neue Daten uebertragen. Zusaetzlich dazu werden in Quellverzeichnis entfernte Dateien auch in Zielverzeichnis geloscht</LI>
+<LI>-changePassword &lt;passwort>: aendert das Verschluesselungspasswort</LI>
+<LI>-cleanup: Loescht verwaiste Datenobjekte auf dem Server.</LI>
+</ul>
+<h4>Wichtigste Optionen</h4>
+<ul>
+<LI>-s3Key: Ihr Identifikationscode fuer S3 System</LI>
+<LI>-s3Secret: Ihr Zugriffcode fuer S3 System. Immer schoen vor fremden Augen schuetzen</LI>
+<LI>-password: Verschluesselungspasswort fuer Nutzdaten</LI>
+<LI>-bucket: Name des Buckets das genutzt werden soll. Wenn '-bucket' Option nicht vorhanden ist, dann wird automatisch einen Bucket angelegt.</LI>
+<LI>-remoteDir: Name des serverseitigen Verzeichnisses von wo oder wochin die Daten gelesen oder geschrieben werden</LI>
+<LI>-localDir: Name des lokalen Verzeichnisses von wo oder wochin die Daten gelesen oder geschrieben werden</LI>
+<LI>-include: Dateipatterns mit '*' und '?'. Es werden nur Dateien in update/snapshot Operationen inkludiert, die diesem Muster entsprechen. Mehrere Muster koennen durch Komma getrennt angegeben werden. Z.b.: '*.java' bedeuted, dass nur Dateien mit Endung '.java' beruecksichtigt werden. Ohne '-include' Option werden alle Dateien auf dem lokalen oder entfernten Verzeichnis beruecksichtigt. Zeichen '*' steht fuer keine oder mehrere Zeichen. '?' steht fuer genau ein beliebiges Zeichen</LI>
+<LI>-exclude: Dateipatterns mit '*' und '?'. Bestimmt welche Dateien aus Operation ausgenommen werden sollen. Z.b. 'temp/*.java' bedeuted: Dateien mit Endung '.java' aus Verzeichnis 'temp' sollen ignoriert werden. Zeichen '*' steht fuer keine oder mehrere Zeichen. '?' steht fuer genau ein beliebiges Zeichen</LI>
+</ul>
+
+</body>
+</html>
