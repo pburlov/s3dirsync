@@ -17,7 +17,6 @@
 package de.burlov.amazon.s3.dirsync.test;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collection;
@@ -51,7 +50,6 @@ public class TestDirSync
 	public void testUpload() throws Exception, DirSyncException
 	{
 		S3Utils.deleteBucket(accessKey, secretKey, accessKey + ".dirsync");
-		FileUtils.cleanDirectory(new File(uploadDir));
 		createTestData(new File(uploadDir), 10, 10000);
 		CLI.main(new String[] { "-snapshot", "up", "-localDir", uploadDir, "-remoteDir", "test", "-s3Key", accessKey, "-s3Secret", secretKey, "-password", "test" });
 
@@ -62,7 +60,7 @@ public class TestDirSync
 	{
 		CLI.main(new String[] { "-snapshot", "down", "-localDir", downloadDir, "-remoteDir", "test", "-s3Key", accessKey, "-s3Secret", secretKey, "-password", "test" });
 
-		Assert.assertTrue(compareFolders(new File(uploadDir), new File(downloadDir)));
+		Assert.assertTrue("not equals upload/download folders", compareFolders(new File(uploadDir), new File(downloadDir)));
 	}
 
 	private boolean compareFolders(File dir1, File dir2) throws IOException
@@ -88,17 +86,21 @@ public class TestDirSync
 
 	private void createTestData(File baseDir, int fileAmount, int medianSize) throws IOException
 	{
+		if (baseDir.exists())
+		{
+			FileUtils.cleanDirectory(baseDir);
+		}
 		for (int i = 0; i < fileAmount; i++)
 		{
 			int count = RandomUtils.nextInt(512);
-			String filename = RandomStringUtils.random(count, "1234567890poiuytrewqasdfghjklmnbvcxz/");
+			String filename = RandomStringUtils.random(count, "1234567890/");
 			count = RandomUtils.nextInt(medianSize);
 			byte[] data = new byte[count];
 			new Random().nextBytes(data);
 			File file = new File(baseDir, filename);
 			file.getParentFile().mkdirs();
 
-			OutputStream out = new FileOutputStream(file);
+			OutputStream out = FileUtils.openOutputStream(file);
 			out.write(data);
 			out.close();
 		}

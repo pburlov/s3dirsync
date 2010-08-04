@@ -17,7 +17,6 @@
 package de.burlov.amazon.s3.dirsync.datamodel.v1;
 
 import java.io.Serializable;
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
@@ -39,12 +38,13 @@ public class Folder implements Serializable
 	static final private String STORAGE_ID = "STORAGE_ID";
 
 	private HashMap<String, Object> properties = new HashMap<String, Object>(3);
-	
+
 	/*
-	 * Nicht serialisierbare Index zum schnellen finden der FileInfo Objekten anhand der Hash Werte
+	 * Nicht serialisierbare Index zum schnellen finden der FileInfo Objekten
+	 * anhand der Hash Werte
 	 */
 	transient private HashMap<ByteArrayKey, FileInfo> fileHashIndex;
-	
+
 	/*
 	 * Filename zu FileInfo Objekten
 	 */
@@ -88,52 +88,62 @@ public class Folder implements Serializable
 	}
 
 	/**
-	 * Methode konstruiert Hash-Index aus vorhandenen FileInfo Objekte. Wird unmittelbar nach
-	 * der Deserialisierung aufgerufen
+	 * Methode konstruiert Hash-Index aus vorhandenen FileInfo Objekte. Wird
+	 * unmittelbar nach der Deserialisierung aufgerufen
 	 */
 	public void initFileHashIndex()
 	{
 		fileHashIndex = new HashMap<ByteArrayKey, FileInfo>();
-		for(FileInfo info : indexData.values())
+		for (FileInfo info : indexData.values())
 		{
-			if(info.getHash() != null)
+			if (info.getHash() != null)
 			{
-			fileHashIndex.put(new ByteArrayKey(info.getHash()), info);
+				fileHashIndex.put(new ByteArrayKey(info.getHash()), info);
 			}
 		}
 	}
-	
+
 	/**
 	 * Synchronisiert Hashwerte Index-Konstrukt mit aktuellen Daten
-	 * @return Set mit S3-Keys die nicht mehr referenziert werden und sollen aus S3 Storage geloescht werden
+	 * 
+	 * @return Set mit S3-Keys die nicht mehr referenziert werden und sollen aus
+	 *         S3 Storage geloescht werden
 	 */
 	public Set<String> syncFileHashIndex()
 	{
 		Map<ByteArrayKey, FileInfo> oldData = fileHashIndex;
 		initFileHashIndex();
 		HashSet<String> ret = new HashSet<String>();
-		for(FileInfo info : oldData.values())
+		if (oldData != null)
 		{
-			if(info.getHash() == null)
+			for (FileInfo info : oldData.values())
 			{
-				continue;
-			}
-			/*
-			 * Alte Objekte durchgehen und nachsehen ob deren Hashwert nicht mehr referenziert wird
-			 */
-			if(!fileHashIndex.containsKey(new ByteArrayKey(info.getHash())))
-			{
-				ret.add(info.getStorageId());
+				if (info.getHash() == null)
+				{
+					continue;
+				}
+				/*
+				 * Alte Objekte durchgehen und nachsehen ob deren Hashwert nicht
+				 * mehr referenziert wird
+				 */
+				if (!fileHashIndex.containsKey(new ByteArrayKey(info.getHash())))
+				{
+					ret.add(info.getStorageId());
+				}
 			}
 		}
 		return ret;
 	}
-	
+
 	public FileInfo getFileInfo(byte[] hash)
 	{
+		if (fileHashIndex == null)
+		{
+			initFileHashIndex();
+		}
 		return fileHashIndex.get(new ByteArrayKey(hash));
 	}
-	
+
 	public FileInfo getFileInfo(String name)
 	{
 		return indexData.get(name);
